@@ -26,33 +26,66 @@ def set_table_borders(table):
 
     tblPr.append(borders)
 
+
 # ===== LLM FUNCTION =====
 def analyze_qualitative(text):
+
     if not text.strip():
         return "No comments provided."
 
-    text = text[:3000]
+    # Limit excessively long prompts
+    text = text[:4000]
 
     prompt = f"""
-You are analyzing training evaluation feedback.
+The following comments were provided by participants during evaluation of programme coordination and administration at the Kenya School of Government.
 
-Comments:
+Participant Feedback:
 {text}
 
-Write exactly TWO professional paragraphs:
-- Paragraph 1: Positive feedback
-- Paragraph 2: Areas of improvement
+Write exactly TWO concise professional paragraphs.
 
-Use formal institutional tone. No bullets. No headings.
+Paragraph 1:
+Summarize the most recurring positive feedback regarding programme coordination, administration, communication, organization, participant support, and overall management of the programme.
+
+Paragraph 2:
+Summarize the most recurring suggestions for improvement. Focus only on issues mentioned by multiple participants or issues that appear significant.
+
+Requirements:
+- Use formal institutional language
+- Sound human and evidence-based
+- Avoid exaggerated praise
+- Avoid generic AI wording
+- Avoid repetition
+- Do not use bullets or headings
+- Keep paragraphs concise and professional
 """
 
     response = client.chat.completions.create(
+
         model="gpt-5-nano-2025-08-07",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=1
+
+        messages=[
+
+            {
+                "role": "system",
+                "content":
+                (
+                    "You are an institutional monitoring and evaluation officer "
+                    "writing formal Kenya School of Government evaluation reports. "
+                    "Write in a professional, concise, evidence-based and human tone. "
+                    "Avoid exaggerated language, repetition, and generic AI wording."
+                )
+            },
+
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
     )
 
     return response.choices[0].message.content.strip()
+
 
 # ===== INPUT =====
 file_name = input("Enter cleaned CE file: ").strip()
